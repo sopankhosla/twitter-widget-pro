@@ -25,7 +25,7 @@ You may also be interested in WordPress tips and tricks at <a href="http://wpinf
 
 == Frequently Asked Questions ==
 
-= Can I have use than one instance of this widget? =
+= Can I use more than one instance of this widget? =
 
 Yes, Twitter Widget Pro employs the multi-widget pattern, which allows you to not only have more than one instance of this widget on your site, but even allows more than one instance of this widget in a single sidebar.
 
