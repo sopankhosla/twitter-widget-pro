@@ -3,8 +3,8 @@ Contributors: aaroncampbell
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal%40xavisys%2ecom&item_name=Twitter%20Widget%20Pro&no_shipping=0&no_note=1&tax=0&currency_code=USD&lc=US&bn=PP%2dDonationsBF&charset=UTF%2d8
 Tags: twitter, widget, feed
 Requires at least: 2.8
-Tested up to: 2.8.4
-Stable tag: 2.0.3
+Tested up to: 2.9
+Stable tag: 2.1.1
 
 A widget that properly handles twitter feeds, including parsing @username, #hashtags, and URLs into links. Requires PHP5.
 
@@ -15,13 +15,12 @@ link parsing.  It supports displaying profiles images, and even lets you control
 whether to display the time and date of a tweet or how log ago it happened
 (about 5 hours ago, etc).  Requires PHP5.
 
-You may also be interested in WordPress tips and tricks at <a href="http://wpinformer.com">WordPress Informer</a> or gerneral <a href="http://webdevnews.net">Web Developer News</a>
-
 == Installation ==
 
 1. Verify that you have PHP5, which is required for this plugin.
 1. Upload the whole `twitter-widget-pro` directory to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
+1. In WordPress admin go to 'Appearance' -> 'Widgets' and add "Twitter Widget Pro" to one of your widget-ready areas of your site
 
 == Frequently Asked Questions ==
 
@@ -33,13 +32,42 @@ Yes, Twitter Widget Pro employs the multi-widget pattern, which allows you to no
 
 Absolutely, each instance of the widget can have different settings and track different feeds.
 
-= Why can't I display a friends feed anymore? =
-
-Aparently the database queries required to display the friends feed was causing twitter to crash, so they removed it.  Unfortunately, this is outside my control.
-
 = I get an error similar to "Parse error: syntax error, unexpected T_STRING, expecting T_OLD_FUNCTION or T_FUNCTION or T_VAR or '}' in /.../wp-twitter-widget.php on line ##" when I try to activate the plugin.  Is your plugin broke? =
 
 No.  This error occurs because the plugin requires PHP 5 and you're running PHP 4. Most hosts offer PHP5 but sometimes you have to enable it in your control panel, through .htaccess, or by asking them.  There may be instructions for your specific host in the <a href="http://codex.wordpress.org/Switching_to_PHP5">Switching to PHP5</a> article in the codex.
+
+= How can I add this widget to a post or page? =
+
+You can now use the twitter-widget shortcode to embed this widget into a post or
+page.  The simplest form of this would be `[twitter-widget username="yourTwitterUsername"]`
+
+= How exactly do you use the twitter-widget shortcode? =
+The simplest form of this would be `[twitter-widget username="yourTwitterUsername"]`
+However, there are more things you can control.
+
+* before_widget - This is inserted before the widget.
+* after_widget - This is inserted after the widget, and is often used to close tags opened in before_widget
+* before_title - This is inserted before the title and defults to <h2>
+* after_title - This is inserted after the title and defults to </h2>
+* errmsg - This is the error message that displays if there's a problem connecting to Twitter
+* hiderss - set to true to hide the RSS icon (defaults to false)
+* hidereplies - set to true to hide @replies that are sent from the account (defaults to false)
+* avatar - set to true to display the avatar from the Twitter account (defaults to false)
+* targetBlank - set to true to have all links open in a new window (defaults to false)
+* showXavisysLink - set to true to display a link to the Twitter Widget Pro page.  We greatly appreciate your support in linking to this page so others can find this useful plugin too!  (defaults to false)
+* items - The number of items to display (defaults to 10)
+* showts - Number of seconds old a tweet has to be to show ___ ago rather than a date/time (defaults to 86400 seconds which is 24 hours)
+* title - The title of the widget (defaults 'Twitter: Username')
+
+You can see these put into action by trying something like:
+
+* `[twitter-widget username="wpinformer" before_widget="<div class='half-box'>" after_widget="</div>" before_title="<h1>" after_title="</h1>" errmsg="Uh oh!" hiderss="true" hidereplies="true" targetBlank="true" avatar="1" showXavisysLink="1" items="3" showts="60"]Your Title[/twitter-widget]`
+* `[twitter-widget username="wpinformer" before_widget="<div class='half-box'>" after_widget="</div>" before_title="<h1>" after_title="</h1>" errmsg="Uh oh!" hiderss="true" hidereplies="true" targetBlank="true" avatar="1" showXavisysLink="1" items="3" showts="60" title="Your Title"]`
+* `[twitter-widget username="wpinformer"]`
+
+= Why can't I display a friends feed anymore? =
+
+Aparently the database queries required to display the friends feed was causing twitter to crash, so they removed it.  Unfortunately, this is outside my control.
 
 == Screenshots ==
 
@@ -49,6 +77,17 @@ No.  This error occurs because the plugin requires PHP 5 and you're running PHP 
 4. By using some (X)HTML in the title element and adding a few styles and a background image, you could make it look like this.
 
 == Changelog ==
+
+= 2.1.1 =
+* Added an option to open links in new windows
+
+= 2.1.0 =
+* Added a shortcode to allow you to embed a widget in any post or page
+
+= 2.0.5 =
+* Remove the settings link from the plugin line on the plugins page
+* Add a link to manage widgets to the plugin line on the plugins page
+* Make date string translatable
 
 = 2.0.4 =
 * Added twitterwidget-title and twitterwidget-rss classes to the title and rss links for separate styling
