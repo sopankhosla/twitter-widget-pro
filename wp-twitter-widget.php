@@ -3,7 +3,7 @@
  * Plugin Name: Twitter Widget Pro
  * Plugin URI: http://xavisys.com/wordpress-plugins/wordpress-twitter-widget/
  * Description: A widget that properly handles twitter feeds, including @username, #hashtag, and link parsing.  It can even display profile images for the users.  Requires PHP5.
- * Version: 2.1.1
+ * Version: 2.1.4-dev
  * Author: Aaron D. Campbell
  * Author URI: http://xavisys.com/
  * Text Domain: twitter-widget-pro
@@ -60,6 +60,7 @@ class WP_Widget_Twitter_Pro extends WP_Widget {
 								'targetBlank'		=> false,
 								'items'				=> 10,
 								'showts'			=> 60 * 60 * 24,
+								'dateFormat'		=> __('h:i:s A F d, Y', 'twitter-widget-pro'),
 		);
 
 		return wp_parse_args( $instance, $defaultArgs );
@@ -67,6 +68,7 @@ class WP_Widget_Twitter_Pro extends WP_Widget {
 
 	public function form( $instance ) {
 		$instance = $this->_getInstanceSettings( $instance );
+		$wpTwitterWidget = wpTwitterWidget::getInstance();
 ?>
 			<p>
 				<label for="<?php echo $this->get_field_id('username'); ?>"><?php _e('Twitter username:', 'twitter-widget-pro'); ?></label>
@@ -111,6 +113,10 @@ class WP_Widget_Twitter_Pro extends WP_Widget {
 				</select>
 			</p>
 			<p>
+				<label for="<?php echo $this->get_field_id('dateFormat'); ?>"><?php echo sprintf(__('Format to dispaly the date in, uses <a href="%s">PHP date()</a> format:', 'twitter-widget-pro'), 'http://php.net/date'); ?></label>
+				<input class="widefat" id="<?php echo $this->get_field_id('dateFormat'); ?>" name="<?php echo $this->get_field_name('dateFormat'); ?>" type="text" value="<?php esc_attr_e($instance['dateFormat']); ?>" />
+			</p>
+			<p>
 				<input class="checkbox" type="checkbox" value="true" id="<?php echo $this->get_field_id('hiderss'); ?>" name="<?php echo $this->get_field_name('hiderss'); ?>"<?php checked($instance['hiderss'], 'true'); ?> />
 				<label for="<?php echo $this->get_field_id('hiderss'); ?>"><?php _e('Hide RSS Icon and Link', 'twitter-widget-pro'); ?></label>
 			</p>
@@ -126,6 +132,7 @@ class WP_Widget_Twitter_Pro extends WP_Widget {
 				<input class="checkbox" type="checkbox" value="true" id="<?php echo $this->get_field_id('showXavisysLink'); ?>" name="<?php echo $this->get_field_name('showXavisysLink'); ?>"<?php checked($instance['showXavisysLink'], 'true'); ?> />
 				<label for="<?php echo $this->get_field_id('showXavisysLink'); ?>"><?php _e('Show Link to Twitter Widget Pro', 'twitter-widget-pro'); ?></label>
 			</p>
+			<p><?php echo $wpTwitterWidget->getSupportForumLink(); ?></p>
 <?php
 		return;
 	}
@@ -183,13 +190,13 @@ class wpTwitterWidget
 		/**
 		 * Add filters and actions
 		 */
-		add_filter( 'init', array( $this, 'init_locale') );
-		add_action( 'widgets_init', array($this, 'register') );
-		add_filter( 'widget_twitter_content', array($this, 'linkTwitterUsers') );
-		add_filter( 'widget_twitter_content', array($this, 'linkUrls') );
-		add_filter( 'widget_twitter_content', array($this, 'linkHashtags') );
+		add_filter( 'init', array( $this, 'init_locale' ) );
+		add_action( 'widgets_init', array( $this, 'register' ) );
+		add_filter( 'widget_twitter_content', array( $this, 'linkTwitterUsers' ) );
+		add_filter( 'widget_twitter_content', array( $this, 'linkUrls' ) );
+		add_filter( 'widget_twitter_content', array( $this, 'linkHashtags' ) );
 		add_filter( 'widget_twitter_content', 'convert_chars' );
-		add_filter( 'plugin_action_links', array($this, 'addWidgetLink'), 10, 2 );
+		add_filter( 'plugin_action_links', array( $this, 'addPluginPageLinks' ), 10, 2 );
 		add_action ( 'in_plugin_update_message-'.plugin_basename ( __FILE__ ) , array ( $this , '_changelog' ), null, 2 );
 		add_shortcode( 'twitter-widget', array( $this, 'handleShortcodes' ) );
 	}
@@ -243,13 +250,21 @@ class wpTwitterWidget
 		return '<strong>' . $this->_buildLink($user->screen_name, $attrs) . '</strong>';
 	}
 
-	public function addWidgetLink( $links, $file ){
+	public function addPluginPageLinks( $links, $file ){
 		if ( $file == plugin_basename(__FILE__) ) {
-			// Add settings link to our plugin
+			// Add Widget Page link to our plugin
 			$link = '<a href="widgets.php">' . __('Manage Widgets', 'twitter-widget-pro') . '</a>';
+			array_unshift( $links, $link );
+
+			// Add Support Forum link to our plugin
+			$link = $this->getSupportForumLink();
 			array_unshift( $links, $link );
 		}
 		return $links;
+	}
+
+	public function getSupportForumLink() {
+		return '<a href="http://xavisys.com/support/forum/twitter-widget-pro/">' . __('Support Forum', 'efficient_related_posts') . '</a>';
 	}
 
 	/**
@@ -259,7 +274,7 @@ class wpTwitterWidget
 	 * @return string - Tweet text with @replies linked
 	 */
 	public function linkTwitterUsers($text) {
-		$text = preg_replace_callback('/(^|\s)@(\w*)/i', array($this, '_linkTwitterUsersCallback'), $text);
+		$text = preg_replace_callback('/(^|\s)@(\w+)/i', array($this, '_linkTwitterUsersCallback'), $text);
 		return $text;
 	}
 
@@ -407,7 +422,6 @@ class wpTwitterWidget
 		}
 		$twitterLink = 'http://twitter.com/' . $args['username'];
 
-		$args['after_title'] = '</a>' . $args['after_title'];
 		if (empty($args['title'])) {
 			$args['title'] = "Twitter: {$args['username']}";
 		}
@@ -433,19 +447,19 @@ class wpTwitterWidget
 			foreach ($tweets as $tweet) {
 				if ( $args['hidereplies'] != 'true' || empty($tweet->in_reply_to_user_id)) {
 					// Set our "ago" string which converts the date to "# ___(s) ago"
-					$tweet->ago = $this->_timeSince(strtotime($tweet->created_at), $args['showts']);
+					$tweet->ago = $this->_timeSince(strtotime($tweet->created_at), $args['showts'], $args['dateFormat']);
 					$entryContent = apply_filters( 'widget_twitter_content', $tweet->text );
 					$from = sprintf(__('from %s', 'twitter-widget-pro'), str_replace('&', '&amp;', $tweet->source));
 					$widgetContent .= '<li>';
 					$widgetContent .= "<span class='entry-content'>{$entryContent}</span>";
-					$widgetContent .= "<span class='entry-meta'>";
+					$widgetContent .= " <span class='entry-meta'>";
 					$widgetContent .= "<span class='time-meta'>";
 					$linkAttrs = array(
 						'href'	=> "http://twitter.com/{$tweet->user->screen_name}/statuses/{$tweet->id}"
 					);
 					$widgetContent .= $this->_buildLink($tweet->ago, $linkAttrs);
 					$widgetContent .= '</span>';
-					$widgetContent .= "<span class='from-meta'>{$from}</span>";
+					$widgetContent .= " <span class='from-meta'>{$from}</span>";
 					if ( !empty($tweet->in_reply_to_screen_name) ) {
 						$rtLinkText = sprintf( __('in reply to %s', 'twitter-widget-pro'), $tweet->in_reply_to_screen_name );
 						$widgetContent .=  '<span class="in-reply-to-meta">';
@@ -578,7 +592,7 @@ class wpTwitterWidget
 	 * @param int $max - Max number of seconds to conver to "ago" messages.  0 for all, -1 for none
 	 * @return string
 	 */
-	private function _timeSince($startTimestamp, $max) {
+	private function _timeSince($startTimestamp, $max, $dateFormat) {
 		// array of time period chunks
 		$chunks = array(
 			'year'		=> 60 * 60 * 24 * 365,	// 31,536,000 seconds
@@ -593,7 +607,7 @@ class wpTwitterWidget
 		$since = time() - $startTimestamp;
 
 		if ($max != '-1' && $since >= $max) {
-			return date_i18n(__('h:i:s A F d, Y', 'twitter-widget-pro'), $startTimestamp);
+			return date_i18n( $dateFormat, $startTimestamp);
 		}
 
 		foreach ( $chunks as $key => $seconds ) {
@@ -654,12 +668,38 @@ class wpTwitterWidget
 			'targetBlank'		=> false,
 			'items'				=> 10,
 			'showts'			=> 60 * 60 * 24,
+			'dateFormat'		=> __('h:i:s A F d, Y', 'twitter-widget-pro'),
 		);
+
+		/**
+		 * Attribute names are strtolower'd, so we need to fix them to match
+		 * the names used through the rest of the plugin
+		 */
+		if ( array_key_exists( 'fetchtimeout', $attr ) ) {
+			$attr['fetchTimeOut'] = $attr['fetchtimeout'];
+			unset($attr['fetchtimeout']);
+		}
+		if ( array_key_exists( 'showxavisyslink', $attr ) ) {
+			$attr['showXavisysLink'] = $attr['showxavisyslink'];
+			unset($attr['showxavisyslink']);
+		}
+		if ( array_key_exists( 'targetblank', $attr ) ) {
+			$attr['targetBlank'] = $attr['targetblank'];
+			unset($attr['targetblank']);
+		}
+		if ( array_key_exists( 'dateformat', $attr ) ) {
+			$attr['dateFormat'] = $attr['dateformat'];
+			unset($attr['dateformat']);
+		}
+
 		if ( !empty($content) && empty($attr['title']) ) {
 			$attr['title'] = $content;
 		}
 
+		dump($attr, '$attr');
+
         $attr = shortcode_atts($defaults, $attr);
+		dump($attr, '$attr');
 
 		if ( $attr['hiderss'] && $attr['hiderss'] != 'false' && $attr['hiderss'] != '0' ) {
 			$attr['hiderss'] == true;
