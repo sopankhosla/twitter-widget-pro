@@ -2,9 +2,9 @@
 Contributors: aaroncampbell
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal%40xavisys%2ecom&item_name=Twitter%20Widget%20Pro&no_shipping=0&no_note=1&tax=0&currency_code=USD&lc=US&bn=PP%2dDonationsBF&charset=UTF%2d8
 Tags: twitter, widget, feed
-Requires at least: 2.8
-Tested up to: 3.2
-Stable tag: 2.2.0
+Requires at least: 3.0
+Tested up to: 3.2.1
+Stable tag: 2.2.4
 
 A widget that properly handles twitter feeds, including parsing @username, #hashtags, and URLs into links. Requires PHP5.
 
@@ -52,6 +52,7 @@ However, there are more things you can control.
 * errmsg - This is the error message that displays if there's a problem connecting to Twitter
 * hiderss - set to true to hide the RSS icon (defaults to false)
 * hidereplies - set to true to hide @replies that are sent from the account (defaults to false)
+* hidefrom - set to true to hide the "from ____" link that shows the application the tweet was sent from (defaults to false)
 * avatar - set to true to display the avatar from the Twitter account (defaults to false)
 * targetBlank - set to true to have all links open in a new window (defaults to false)
 * showXavisysLink - set to true to display a link to the Twitter Widget Pro page.  We greatly appreciate your support in linking to this page so others can find this useful plugin too!  (defaults to false)
@@ -78,7 +79,38 @@ Aparently the database queries required to display the friends feed was causing 
 3. This is what the widget looks like in the default theme with no added styles.
 4. By using some (X)HTML in the title element and adding a few styles and a background image, you could make it look like this.
 
+== Upgrade Notice ==
+
+= 2.2.4 =
+Uses new API urls, new "hide replies" support in the API, can show retweets, supports multiple profile image sizes
+
+= 2.2.3 =
+Fixes links on 32 bit servers.  If you are suffering from this I would recommend changing hosts (or talking to yours).
+
+= 2.2.2 =
+Fixes issue introduced in 2.2.1 with an incorrect function name (sorry about that)
+
+= 2.2.1 =
+Better SEO by adding the ability to remove the "from" links - Thanks <a href="http://yoast.com/">Joost de Valk</a>
+
 == Changelog ==
+
+= 2.2.4 =
+* Use the new API URLs
+* Use the new "hide replies" option in the Twitter API
+* Add support to show retweets
+* Add support for multiple profile image sizes
+
+= 2.2.3 =
+* The Twitter-pocolypse hit a while back but since so many servers are 64 bit it wasn't an issue.  This fixes links for users on 32 bit servers.
+* Fix some notices thrown by translated strings
+
+= 2.2.2 =
+* Fix issue introduced in 2.2.1 with an incorrect function name '_hashtagLink' (sorry about that)
+
+= 2.2.1 =
+* Add missing space between "from" and "in reply to"
+* Add the ability to remove the "from" links from displaying - Thanks to <a href="http://yoast.com/">Joost de Valk</a> for the request and the patch!
 
 = 2.2.0 =
 * Now uses the Xavisys WordPress Plugin Framework - http://xavisys.com/xavisys-wordpress-plugin-framework/
