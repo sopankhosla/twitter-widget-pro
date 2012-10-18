@@ -3,7 +3,7 @@
  * Plugin Name: Twitter Widget Pro
  * Plugin URI: http://bluedogwebservices.com/wordpress-plugin/twitter-widget-pro/
  * Description: A widget that properly handles twitter feeds, including @username, #hashtag, and link parsing.  It can even display profile images for the users.  Requires PHP5.
- * Version: 2.4.0-beta
+ * Version: 2.4.0
  * Author: Aaron D. Campbell
  * Author URI: http://ran.ge/
  * License: GPLv2 or later
@@ -134,7 +134,7 @@ class WP_Widget_Twitter_Pro extends WP_Widget {
 				</select>
 			</p>
 			<p>
-				<label for="<?php echo $this->get_field_id( 'dateFormat' ); ?>"><?php echo sprintf( __( 'Format to dispaly the date in, uses <a href="%s">PHP date()</a> format:', $this->_slug ), 'http://php.net/date' ); ?></label>
+				<label for="<?php echo $this->get_field_id( 'dateFormat' ); ?>"><?php echo sprintf( __( 'Format to display the date in, uses <a href="%s">PHP date()</a> format:', $this->_slug ), 'http://php.net/date' ); ?></label>
 				<input class="widefat" id="<?php echo $this->get_field_id( 'dateFormat' ); ?>" name="<?php echo $this->get_field_name( 'dateFormat' ); ?>" type="text" value="<?php esc_attr_e( $instance['dateFormat'] ); ?>" />
 			</p>
 			<p>
@@ -268,7 +268,7 @@ class wpTwitterWidget extends RangePlugin {
 
 	public function add_options_meta_boxes() {
 		add_meta_box( $this->_slug . '-general-settings', __( 'General Settings', $this->_slug ), array( $this, 'general_settings_meta_box' ), 'range-' . $this->_slug, 'main' );
-		add_meta_box( $this->_slug . '-defaults', __( 'Defaults', $this->_slug ), array( $this, 'default_settings_meta_box' ), 'range-' . $this->_slug, 'main' );
+		add_meta_box( $this->_slug . '-defaults', __( 'Default Settings for Shortcodes', $this->_slug ), array( $this, 'default_settings_meta_box' ), 'range-' . $this->_slug, 'main' );
 	}
 
 	public function general_settings_meta_box() {
@@ -277,7 +277,7 @@ class wpTwitterWidget extends RangePlugin {
 				<table class="form-table">
 					<tr valign="top">
 						<th scope="row">
-							<?php _e( "HTTP vs HTTPS:", $this->_slug );?>
+							<?php _e( "HTTP vs HTTPS", $this->_slug );?>
 						</th>
 						<td>
 							<input class="checkbox" type="radio" value="https" id="twp_http_vs_https_https" name="twp[http_vs_https]"<?php checked( $this->_settings['twp']['http_vs_https'], 'https' ); ?> />
@@ -291,11 +291,41 @@ class wpTwitterWidget extends RangePlugin {
 					</tr>
 					<tr>
 						<th scope="row">
-							<?php _e( "Clear Update Locks:", $this->_slug );?>
+							<?php _e( "Clear Update Locks", $this->_slug );?>
 						</th>
 						<td>
 							<a href="<?php echo esc_url( $clear_locks_url ); ?>"><?php _e( 'Clear Update Locks', $this->_slug ); ?></a><br />
-							<small><?php _e( "A small perecntage of servers seem to have issues where an update lock isn't getting cleared.  If you're experiencing issues with your feed not updating, try clearing the update locks.", $this->_slug ); ?></small>
+							<small><?php _e( "A small percentage of servers seem to have issues where an update lock isn't getting cleared.  If you're experiencing issues with your feed not updating, try clearing the update locks.", $this->_slug ); ?></small>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<?php _e( 'Current API Usage', $this->_slug );?>
+						</th>
+						<td>
+							<?php
+							$limit_url = $this->_api_url . "account/rate_limit_status.json";
+							$resp = wp_remote_request( $limit_url );
+
+							if ( !is_wp_error( $resp ) && $resp['response']['code'] >= 200 && $resp['response']['code'] < 300 ) {
+								$decodedResponse = json_decode( $resp['body'] );
+								?>
+								<p>
+									<?php echo sprintf( __( 'Used: %d', $this->_slug ), $decodedResponse->hourly_limit - $decodedResponse->remaining_hits ); ?><br />
+									<?php echo sprintf( __( 'Remaining: %d', $this->_slug ), $decodedResponse->remaining_hits ); ?><br />
+									<?php
+									$minutes = ceil( ( $decodedResponse->reset_time_in_seconds - gmdate( 'U' ) ) / 60 );
+									echo sprintf( _n( 'Limits reset in: %d minutes', 'Limits reset in: %d minutes', $minutes, $this->_slug ), $minutes );
+									?><br />
+									<small><?php _e( 'This is overall usage, not just usage from Twitter Widget Pro', $this->_slug ); ?></small>
+								</p>
+								<?php
+							} else {
+								?>
+								<p><?php _e( 'There was an error checking your rate limit.', $this->_slug ); ?></p>
+								<?php
+							}
+							?>
 						</td>
 					</tr>
 				</table>
@@ -303,6 +333,7 @@ class wpTwitterWidget extends RangePlugin {
 	}
 	public function default_settings_meta_box() {
 		?>
+				<p><?php _e( 'These settings are the default for the shortcodes and all of them can be overridden by specifying a different value in the shortcode itself.  All settings for widgets are locate in the individual widget.', $this->_slug ) ?></p>
 				<table class="form-table">
 					<tr valign="top">
 						<th scope="row">
@@ -382,7 +413,7 @@ class wpTwitterWidget extends RangePlugin {
 					</tr>
 					<tr valign="top">
 						<th scope="row">
-							<label for="twp_dateFormat"><?php echo sprintf( __( 'Format to dispaly the date in, uses <a href="%s">PHP date()</a> format:', $this->_slug ), 'http://php.net/date' ); ?></label>
+							<label for="twp_dateFormat"><?php echo sprintf( __( 'Format to display the date in, uses <a href="%s">PHP date()</a> format:', $this->_slug ), 'http://php.net/date' ); ?></label>
 						</th>
 						<td>
 							<input id="twp_dateFormat" name="twp[dateFormat]" type="text" class="regular-text code" value="<?php esc_attr_e( $this->_settings['twp']['dateFormat'] ); ?>" size="40" />
@@ -689,7 +720,7 @@ class wpTwitterWidget extends RangePlugin {
 			$widgetContent .= '<div class="range-link"><span class="range-link-text">';
 			$linkAttrs = array(
 				'href'	=> 'http://bluedogwebservices.com/wordpress-plugin/twitter-widget-pro/',
-				'title'	=> __( 'Brought to you by BlueDog Web Services - A WordPress development company', $this->_slug )
+				'title'	=> __( 'Brought to you by Range - A WordPress design and development company', $this->_slug )
 			);
 			$widgetContent .= __( 'Powered by', $this->_slug );
 			$widgetContent .= $this->_buildLink( 'WordPress Twitter Widget Pro', $linkAttrs );
