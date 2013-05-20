@@ -4,23 +4,22 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: twitter, widget, feed
 Requires at least: 3.0
 Tested up to: 3.6
-Stable tag: 2.5.3
+Stable tag: 2.5.4
 
 A widget that properly handles twitter feeds, including parsing @username, #hashtags, and URLs into links.
 
 == Description ==
 
-A widget that properly handles twitter feeds, including parsing @username,
-#hashtag, and URLs into links.  It supports displaying profiles images, and even
-lets you control whether to display the time and date of a tweet or how log ago
-it happened (about 5 hours ago, etc).
+A widget that properly handles twitter feeds, including parsing @username, #hashtag, and URLs into links.  It supports displaying profiles images, and even lets you control whether to display the time and date of a tweet or how log ago it happened (about 5 hours ago, etc).
 
-<a href="http://bluedogwebservices.com/wordpress-plugin/twitter-widget-pro/">Twitter Widget Pro</a>
+<a href="http://ran.ge/wordpress-plugin/twitter-widget-pro/">Twitter Widget Pro</a>
 Brought to you by <a href="http://ran.ge/" title="WordPress Development">Ran.ge</a>
 
 == Installation ==
 
-1. Use automatic installer.
+1. Use automatic installer to install and active the plugin.
+1. You should see a notice appear in your admin that links you to the settings page.
+1. Follow the instructions to setup your Twitter app and authenticate your account (an unfortunate step made necessary by Twitter's API changes).
 1. In WordPress admin go to 'Appearance' -> 'Widgets' and add "Twitter Widget Pro" to one of your widget-ready areas of your site
 
 == Frequently Asked Questions ==
@@ -132,6 +131,9 @@ Aparently the database queries required to display the friends feed was causing 
 
 == Upgrade Notice ==
 
+= 2.5.4 =
+Minor fix for a strict PHP notice
+
 = 2.5.3 =
 Another SSL verification fix and add Twitter List support to shortcodes
 
@@ -187,6 +189,9 @@ Fixes an issue with the intents and follow settings not being saved
 Fewer "could not connect to Twitter" messages, new links (reply, retweet, favorite), new follow button, and avatar fixes
 
 == Changelog ==
+
+= 2.5.4 =
+* Minor fix for a strict PHP notice
 
 = 2.5.3 =
 * Don't force verification of Twitter's SSL certificate

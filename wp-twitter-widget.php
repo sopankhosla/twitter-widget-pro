@@ -3,7 +3,7 @@
  * Plugin Name: Twitter Widget Pro
  * Plugin URI: http://bluedogwebservices.com/wordpress-plugin/twitter-widget-pro/
  * Description: A widget that properly handles twitter feeds, including @username, #hashtag, and link parsing.  It can even display profile images for the users.  Requires PHP5.
- * Version: 2.5.3
+ * Version: 2.5.4
  * Author: Aaron D. Campbell
  * Author URI: http://ran.ge/
  * License: GPLv2 or later
@@ -820,6 +820,7 @@ class wpTwitterWidget extends RangePlugin {
 		$attributes = wp_parse_args( $attributes );
 
 		$text = apply_filters( 'widget_twitter_link_text', $text );
+		$noFilter = apply_filters( 'widget_twitter_link_nofilter', $noFilter );
 		$link = '<a';
 		foreach ( $attributes as $name => $value ) {
 			$link .= ' ' . esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
@@ -1156,7 +1157,7 @@ class wpTwitterWidget extends RangePlugin {
 			'href'  => "http://twitter.com/{$user->screen_name}",
 			'title' => $user->name
 		);
-		$replace = ( 'original' == $args['avatar'] )? '':"_{$args['avatar']}.";
+		$replace = ( 'original' == $args['avatar'] )? '.':"_{$args['avatar']}.";
 		$img = str_replace( '_normal.', $replace, $user->profile_image_url_https );
 
 		return $this->_buildLink( "<img alt='{$user->name}' src='{$img}' />", $linkAttrs, true );
